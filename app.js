@@ -33,7 +33,17 @@ async function init(){
     $(".endMarker").css("transform",`translateY(${10 * gameObj.end}vh)`);
 
     gameObj.key_locations.start_cell = [0, gameObj.start]
-    gameObj.key_locations.end_cell = [gameObj.dimentions[1] - 1, gameObj.end]
+    gameObj.key_locations.end_cell = [gameObj.dimentions[1] - 1, gameObj.end];
+
+    // Set up board matrix
+    gameObj.board_matrix = [];
+    for(let i = 0; i < gameObj.dimentions[1]; i++){
+        const row = [];
+        for(let g = 0; g < gameObj.dimentions[0]; g++){
+            row.push("empty")
+        }
+        gameObj.board_matrix.push(row)
+    }
 
     playerControls();
 }
@@ -53,6 +63,104 @@ function playerControls(){
         event.preventDefault();
     }).on("drop",(event)=>{
         $(event.currentTarget).append(player.dragging);
+        
+        const y = $(event.currentTarget).parent().attr("id").replaceAll("row","");
+        const x = $(event.currentTarget).attr("id").replaceAll("col","");
+        const type = player.dragging.children('.pipe').attr("type");
+
+        gameObj.board_matrix[y][x] = type
+
+        console.log(gameObj.board_matrix);
+
         player.dragging = false;
     })
+
+    //Start
+    $("#start").on("click",(event)=>{
+        startSim();
+    })
+}
+
+async function startSim(){
+
+    let end = false;
+    let currentPipe = gameObj.key_locations.start_cell;
+    let lastDirection = 4;
+    let counter = 0;
+    do{
+        // console.log("CURRENTPIPE", currentPipe)
+        let check = await checkPipe(currentPipe, lastDirection);
+        // console.log(check);
+
+        if(check == 'END'){
+            // If the end cell is correct. Game Win
+            console.log("WOW")
+            end = true;
+        }else if(!check){
+            end = true;
+        }else{
+            switch(check[1]){
+                case 1:
+                    // Next pipe is up
+                    currentPipe = [currentPipe[0], currentPipe[1] - 1];
+                    lastDirection = 3;
+                break;
+
+                case 2:
+                    // Next pipe is right
+                    currentPipe = [currentPipe[0] + 1, currentPipe[1]]
+                    lastDirection = 4;
+                break;
+
+                case 3:
+                    // Next pipe is down
+                    currentPipe = [currentPipe[0], currentPipe[1] + 1]
+                    lastDirection = 1;
+                break;
+
+                case 4:
+                    // Next pipe is left
+                    currentPipe = [currentPipe[0] - 1, currentPipe[1]]
+                    lastDirection = 2;
+                break;
+            }
+        }
+
+    }
+    while(!end)
+}
+
+async function checkPipe(pipe, lastDirection){
+    let pipeType = gameObj.board_matrix[pipe[1]][pipe[0]];
+
+    if(pipeType == "empty"){
+        console.log(pipe[0],pipe[1], "Empty")
+        return false;
+    }
+
+    let pipeDir = gameObj.pipe_lib[pipeType];
+
+    let input = pipeDir[lastDirection];
+    if(!input){
+        console.warn(pipe[0], pipe[1], "No connection")
+        return false;
+    }
+
+
+
+    // console.log("Pipe is coming from",lastDirection);
+    // console.log("Pipe is going to", pipeDir[lastDirection]);
+    console.log(pipe[0], pipe[1], "Correct")
+
+
+
+    // Check if victory
+    let end_cell = gameObj.key_locations.end_cell.toString();
+    let cell = [pipe[0], pipe[1]].toString();
+
+    if(end_cell == cell){
+        return 'END'
+    }
+
+    return [true, input];
 }
