@@ -17,7 +17,8 @@ let gameObj = {
         top_left:{4:1,1:4},
         bottom_left:{4:3,3:4},
         bottom_right:{3:2,2:3}
-    }
+    },
+    zoom_level:0
 }
 
 const player = {
@@ -75,6 +76,31 @@ function playerControls(){
         player.dragging = false;
     })
 
+
+    // *Tabled for now. Divs were not set up for this*
+    // Zoom Controls
+    // $(".game").on("wheel",(event)=>{
+    //     switch(event.originalEvent.deltaY){
+    //         case 100:
+    //             console.log("out")
+    //             if(gameObj.zoom_level > 0){
+    //                 gameObj.zoom_level -= 10;
+    //             }
+    //         break;
+
+    //         case -100:
+    //             console.log("in")
+    //             if(gameObj.zoom_level < 90){
+    //                 gameObj.zoom_level += 10;
+    //             }
+    //         break;
+    //     }
+
+    //     console.log(`1.${gameObj.zoom_level}`)
+    //     $(".board").css("scale",`1.${gameObj.zoom_level}`);
+    // })
+
+
     //Start
     $("#start").on("click",(event)=>{
         startSim();
@@ -86,7 +112,6 @@ async function startSim(){
     let end = false;
     let currentPipe = gameObj.key_locations.start_cell;
     let lastDirection = 4;
-    let counter = 0;
     do{
         // console.log("CURRENTPIPE", currentPipe)
         let check = await checkPipe(currentPipe, lastDirection);
@@ -164,3 +189,6 @@ async function checkPipe(pipe, lastDirection){
 
     return [true, input];
 }
+
+// Next up should be either animations or having the grid size changeable
+// Look into scrolling to zoom into the board
