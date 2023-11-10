@@ -156,6 +156,10 @@ async function startSim(){
 }
 
 async function checkPipe(pipe, lastDirection){
+    // Variable naming is a little confusing here
+    // input is the input for the next pipe
+    // lastDirection is the input for this pipe
+
     let pipeType = gameObj.board_matrix[pipe[1]][pipe[0]];
 
     if(pipeType == "empty"){
@@ -179,16 +183,141 @@ async function checkPipe(pipe, lastDirection){
 
 
 
+
+
+    // Water animation triggers;
+    const water = $(`#row${pipe[1]} #col${pipe[0]} .water`);
+    const waterStatus = await waterAnim(water, lastDirection, input);
+
     // Check if victory
     let end_cell = gameObj.key_locations.end_cell.toString();
     let cell = [pipe[0], pipe[1]].toString();
 
-    if(end_cell == cell){
+    console.warn(input)
+    if((end_cell == cell) && (input == 2)){
         return 'END'
     }
 
     return [true, input];
 }
 
-// Next up should be either animations or having the grid size changeable
-// Look into scrolling to zoom into the board
+async function waterAnim(water, inputDir, outputDir){
+    console.log("The water is coming from", inputDir, "and exiting from", outputDir)
+    return new Promise((resolve, reject)=>{
+
+        // Didn't want to set up a big switch but i guess this works
+
+            switch(`${inputDir}` + `${outputDir}`){
+                // Vertical
+                case '13':
+                    $(water[0]).css({'transform-origin':'top','transform':'scaleY(1)'}).on("transitionend",(event)=>{
+                        $(event.currentTarget).off("transitionend");
+                        resolve("PIPE DONE")
+                    })
+                break;
+                case '31':
+                    $(water[0]).css({'transform-origin':'bottom','transform':'scaleY(1)'}).on("transitionend",(event)=>{
+                        $(event.currentTarget).off("transitionend");
+                        resolve("PIPE DONE")
+                    })
+                break;
+
+                // Horizontal
+                case '42':
+                    $(water[0]).css({'transform-origin':'left','transform':'scaleX(1)'}).on("transitionend",(event)=>{
+                        $(event.currentTarget).off("transitionend");
+                        resolve("PIPE DONE")
+                    })
+                break;
+                case '24':
+                    $(water[0]).css({'transform-origin':'right','transform':'scaleX(1)'}).on("transitionend",(event)=>{
+                        $(event.currentTarget).off("transitionend");
+                        resolve("PIPE DONE")
+                    })
+                break;
+
+                // Top Left
+                case '41':
+                    $(water[1]).css({'transform-origin':'left','transform':'scaleX(1)'}).on("transitionend",(event)=>{
+                        $(event.currentTarget).off("transitionend");
+                        $(water[0]).css({'transform-origin':'bottom','transform':'scaleY(1)'}).on("transitionend",(event)=>{
+                            $(event.currentTarget).off("transitionend");
+                            resolve("PIPE DONE")
+                        })
+                    })
+                break;
+                case '14':
+                    $(water[0]).css({'transform-origin':'top','transform':'scaleX(1)'}).on("transitionend",(event)=>{
+                        $(event.currentTarget).off("transitionend");
+                        $(water[1]).css({'transform-origin':'right','transform':'scaleY(1)'}).on("transitionend",(event)=>{
+                            $(event.currentTarget).off("transitionend");
+                            resolve("PIPE DONE")
+                        })
+                    })
+                break;
+
+                // Top Right
+                case '12':
+                    $(water[0]).css({'transform-origin':'top','transform':'scaleX(1)'}).on("transitionend",(event)=>{
+                        $(event.currentTarget).off("transitionend");
+                        $(water[1]).css({'transform-origin':'left','transform':'scaleY(1)'}).on("transitionend",(event)=>{
+                            $(event.currentTarget).off("transitionend");
+                            resolve("PIPE DONE")
+                        })
+                    })
+                break;
+                case '21':
+                    $(water[1]).css({'transform-origin':'right','transform':'scaleX(1)'}).on("transitionend",(event)=>{
+                        $(event.currentTarget).off("transitionend");
+                        $(water[0]).css({'transform-origin':'bottom','transform':'scaleY(1)'}).on("transitionend",(event)=>{
+                            $(event.currentTarget).off("transitionend");
+                            resolve("PIPE DONE")
+                        })
+                    })
+                break;
+
+                // Bottom Left
+                case '34':
+                    $(water[0]).css({'transform-origin':'bottom','transform':'scaleX(1)'}).on("transitionend",(event)=>{
+                        $(event.currentTarget).off("transitionend");
+                        $(water[1]).css({'transform-origin':'right','transform':'scaleY(1)'}).on("transitionend",(event)=>{
+                            $(event.currentTarget).off("transitionend");
+                            resolve("PIPE DONE")
+                        })
+                    })
+                break;
+                case '43':
+                    $(water[1]).css({'transform-origin':'left','transform':'scaleX(1)'}).on("transitionend",(event)=>{
+                        $(event.currentTarget).off("transitionend");
+                        $(water[0]).css({'transform-origin':'top','transform':'scaleY(1)'}).on("transitionend",(event)=>{
+                            $(event.currentTarget).off("transitionend");
+                            resolve("PIPE DONE")
+                        })
+                    })
+                break;
+
+                // Bottom Right
+                case '32':
+                    $(water[0]).css({'transform-origin':'bottom','transform':'scaleX(1)'}).on("transitionend",(event)=>{
+                        $(event.currentTarget).off("transitionend");
+                        $(water[1]).css({'transform-origin':'left','transform':'scaleY(1)'}).on("transitionend",(event)=>{
+                            $(event.currentTarget).off("transitionend");
+                            resolve("PIPE DONE")
+                        })
+                    })
+                break;
+                case '23':
+                    $(water[1]).css({'transform-origin':'right','transform':'scaleX(1)'}).on("transitionend",(event)=>{
+                        $(event.currentTarget).off("transitionend");
+                        $(water[0]).css({'transform-origin':'top','transform':'scaleY(1)'}).on("transitionend",(event)=>{
+                            $(event.currentTarget).off("transitionend");
+                            resolve("PIPE DONE")
+                        })
+                    })
+                break;
+
+                default:
+                    reject('Bad Directions');
+            }
+    })
+}
